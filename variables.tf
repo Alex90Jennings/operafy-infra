@@ -72,3 +72,9 @@ variable "github_subject_claim" {
   type        = string
   default     = ""
 }
+
+variable "state_bucket" {
+  description = "Bucket holding the Terraform state, which the CI role must read, write and lock."
+  type        = string
+  default     = ""
+}
