@@ -138,6 +138,11 @@ data "aws_iam_policy_document" "deploy" {
       "cloudfront:ListCachePolicies",
       "cloudfront:ListOriginRequestPolicies",
       "cloudfront:ListResponseHeadersPolicies",
+      # Reading the AWS managed policies the distribution refers to. These are
+      # account scoped ARNs for AWS owned policies, so they cannot be narrowed.
+      "cloudfront:GetCachePolicy",
+      "cloudfront:GetOriginRequestPolicy",
+      "cloudfront:GetResponseHeadersPolicy",
     ]
     resources = ["*"]
   }
