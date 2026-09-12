@@ -1,0 +1,11 @@
+# Copy to terraform.tfvars and fill in. terraform.tfvars is gitignored.
+
+aws_account_id = "000000000000"
+aws_profile    = "personal"
+aws_region     = "eu-west-1"
+
+# Leave empty to serve from the CloudFront domain and skip ACM entirely.
+# domain_name = "media.example.com"
+
+# Needs IAM permissions. See the README.
+# enable_github_oidc = true
