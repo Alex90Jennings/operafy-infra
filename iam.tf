@@ -2,9 +2,24 @@
 # role. No access key is ever stored in the repository. Gated behind a flag
 # because creating it needs IAM permissions the deploy user does not have.
 
-data "aws_iam_openid_connect_provider" "github" {
-  count = var.enable_github_oidc ? 1 : 0
-  url   = "https://token.actions.githubusercontent.com"
+# An account can hold only one OIDC provider per URL, and it may already exist
+# from earlier work. Set github_oidc_provider_arn to reuse that one; leave it
+# empty and this creates it. A data source alone would fail on a fresh account,
+# and an unconditional resource would collide on an account that already has it.
+resource "aws_iam_openid_connect_provider" "github" {
+  count = var.enable_github_oidc && var.github_oidc_provider_arn == "" ? 1 : 0
+
+  url            = "https://token.actions.githubusercontent.com"
+  client_id_list = ["sts.amazonaws.com"]
+  # AWS no longer verifies this thumbprint for the GitHub provider, but the
+  # argument is still required.
+  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
+}
+
+locals {
+  github_oidc_arn = var.enable_github_oidc ? (
+    var.github_oidc_provider_arn != "" ? var.github_oidc_provider_arn : aws_iam_openid_connect_provider.github[0].arn
+  ) : null
 }
 
 data "aws_iam_policy_document" "github_assume" {
@@ -16,7 +31,7 @@ data "aws_iam_policy_document" "github_assume" {
 
     principals {
       type        = "Federated"
-      identifiers = [data.aws_iam_openid_connect_provider.github[0].arn]
+      identifiers = [local.github_oidc_arn]
     }
 
     condition {

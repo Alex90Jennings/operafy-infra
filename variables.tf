@@ -60,3 +60,9 @@ variable "github_repository" {
   type        = string
   default     = "Alex90Jennings/operafy-infra"
 }
+
+variable "github_oidc_provider_arn" {
+  description = "ARN of an existing GitHub OIDC provider to reuse. Empty means create one. An account may only have a single provider per URL."
+  type        = string
+  default     = ""
+}
