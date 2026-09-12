@@ -17,6 +17,8 @@ resource "aws_iam_openid_connect_provider" "github" {
 }
 
 locals {
+  github_subject_claim = var.github_subject_claim != "" ? var.github_subject_claim : "repo:${var.github_repository}:*"
+
   github_oidc_arn = var.enable_github_oidc ? (
     var.github_oidc_provider_arn != "" ? var.github_oidc_provider_arn : aws_iam_openid_connect_provider.github[0].arn
   ) : null
@@ -42,10 +44,16 @@ data "aws_iam_policy_document" "github_assume" {
 
     # Scoped to one repository. Without this condition any GitHub repository
     # in the world could assume the role.
+    #
+    # This organisation emits a customised subject claim that embeds the numeric
+    # owner and repository IDs, so the documented "repo:owner/name:*" pattern
+    # never matches. Pinning the IDs is the stronger form anyway: they are
+    # immutable, so renaming the repo or the account cannot hand this role to
+    # whoever claims the freed up name.
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_repository}:*"]
+      values   = [local.github_subject_claim]
     }
   }
 }

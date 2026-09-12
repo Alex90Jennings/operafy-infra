@@ -52,7 +52,7 @@ variable "noncurrent_version_expiration_days" {
 variable "enable_github_oidc" {
   description = "Create the GitHub Actions OIDC provider and deploy role. Needs IAM permissions to apply."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "github_repository" {
@@ -63,6 +63,12 @@ variable "github_repository" {
 
 variable "github_oidc_provider_arn" {
   description = "ARN of an existing GitHub OIDC provider to reuse. Empty means create one. An account may only have a single provider per URL."
+  type        = string
+  default     = ""
+}
+
+variable "github_subject_claim" {
+  description = "Pattern matched against the OIDC token's sub claim. Empty derives the documented repo:owner/name:* form. Override where subject customisation embeds numeric owner and repository IDs, which the Debug OIDC job in the README explains how to read."
   type        = string
   default     = ""
 }

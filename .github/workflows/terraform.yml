@@ -67,7 +67,7 @@ jobs:
 
       - name: Plan
         id: plan
-        run: terraform plan -input=false -no-color -out=tfplan -var "aws_account_id=${{ secrets.AWS_ACCOUNT_ID }}"
+        run: terraform plan -input=false -no-color -out=tfplan -var "aws_account_id=${{ secrets.AWS_ACCOUNT_ID }}" -var "github_subject_claim=${{ vars.GITHUB_SUBJECT_CLAIM }}"
 
       - name: Comment the plan on the pull request
         if: github.event_name == 'pull_request'
