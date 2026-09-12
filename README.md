@@ -119,6 +119,29 @@ Applying a saved plan rather than re-planning at apply time means what was revie
 runs. CI authenticates with GitHub OIDC and a short lived role session, so there is no AWS access key
 in this repository or in its secrets.
 
+### The subject claim, which cost an hour
+
+Every role assumption was refused with `Not authorized to perform sts:AssumeRoleWithWebIdentity`,
+while the provider, the audience and the trust policy all looked correct. CloudTrail redacts the
+request parameters when the call fails authorisation, so it could not say why.
+
+Printing the token's own claims from inside a throwaway workflow gave the answer immediately:
+
+```
+sub: repo:Alex90Jennings@97463171/operafy-infra@1367497483:ref:refs/heads/main
+```
+
+This account has OIDC **subject customisation** enabled, so the claim carries the numeric owner and
+repository IDs. The documented `repo:owner/name:*` pattern never matches, and no amount of staring at
+the trust policy reveals that.
+
+Matching the real claim is the stronger option anyway. Numeric IDs are immutable, so pinning them
+means renaming the repository, or giving up the account name, cannot hand this role to whoever
+registers the name next. `github_subject_claim` carries the pattern.
+
+**The lesson worth keeping:** when a token is rejected, read the token. Guessing at the policy is
+slower and it teaches you nothing.
+
 ---
 
 ## What it costs
@@ -133,9 +156,10 @@ Small, but not zero, and worth knowing before you build it:
 | State bucket | a few kilobytes, effectively free |
 | Requests to S3 | close to zero, because CloudFront absorbs the repeat reads |
 
-For a portfolio project this lands in small change per month. `price_class` defaults to
-`PriceClass_100`, Europe and North America only, because serving a UK audience from São Paulo edges is
-paying for reach nobody is using.
+Measured rather than estimated: Cost Explorer puts CloudFront at **$0.00** across the last four
+months on this account, and S3 at **$0.01 to $0.02**. The media is about 200 MB, so this stack should
+stay near a penny a month. `price_class` defaults to `PriceClass_100`, Europe and North America only,
+because serving a UK audience from São Paulo edges is paying for reach nobody is using.
 
 ---
 
