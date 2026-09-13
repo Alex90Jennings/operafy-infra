@@ -53,7 +53,7 @@ below has a reason attached to it.
 
 ## The guard rail worth copying
 
-This machine holds credentials for more than one AWS account, and one of them is production. A wrong
+Anyone working across more than one AWS account knows the risk. A wrong
 `AWS_PROFILE` is a very cheap mistake to make and a very expensive one to explain, so the provider
 refuses to run anywhere unexpected:
 

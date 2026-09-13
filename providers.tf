@@ -6,9 +6,8 @@ locals {
   }
 }
 
-# allowed_account_ids is a guard rail, not decoration. This machine also holds
-# credentials for a production account, and a wrong AWS_PROFILE would otherwise
-# apply this plan there. Terraform refuses to run if the account does not match.
+# allowed_account_ids is a guard rail, not decoration. A wrong AWS_PROFILE would
+# otherwise apply this plan to whichever account it resolves to. Terraform refuses to run if the account does not match.
 provider "aws" {
   region              = var.aws_region
   profile             = var.aws_profile
